@@ -8,6 +8,6 @@ commands:
     stack:
      description: Stack all items in your inventory.
     stacks:
-     description: Reload inventory stacks.
+     description: "InventoryStacks admin commands. Usage: /stacks <reload|list>"
     inventorystacks:
-     description: Reload inventory stacks.
+     description: "InventoryStacks admin commands. Usage: /inventorystacks <reload|list>"

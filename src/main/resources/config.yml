@@ -83,3 +83,51 @@ prevent-shift-combining-damageable-items: true
 # This makes it so brewing stands only allow 1 potion in the potion slot
 
 one-potion-per-slot: true
+
+############################################################################
+#                                                                          #
+#   Per-World Stack Size Overrides           (Minecraft 1.20.5+ ONLY)      #
+#                                                                          #
+#   Override the stack size of specific items inside particular worlds.    #
+#   Items not listed here will use the global 'items' section values.      #
+#                                                                          #
+#   This feature is OPTIONAL. Remove or leave the 'worlds' section empty   #
+#   to disable it entirely (zero performance overhead when unused).         #
+#                                                                          #
+#   Format:                                                                #
+#     worlds:                                                              #
+#       <world-name>:                                                      #
+#         <MATERIAL>: <stack-size>                                         #
+#                                                                          #
+############################################################################
+
+# worlds:
+#   world_nether:
+#     DIAMOND: 32
+#     POTION: 1
+#   minigames:
+#     ARROW: 128
+#     POTION: 4
+
+############################################################################
+#                                                                          #
+#   Gamemode Restriction                     (Minecraft 1.20.5+ ONLY)      #
+#                                                                          #
+#   When enabled, custom stack sizes are ONLY applied when a player is     #
+#   in one of the listed gamemodes. Switching to a non-listed gamemode     #
+#   (e.g. CREATIVE) will strip custom stack sizes; switching back will     #
+#   restore them.                                                          #
+#                                                                          #
+#   Valid values: SURVIVAL, CREATIVE, ADVENTURE, SPECTATOR                 #
+#                                                                          #
+#   This feature is OPTIONAL. Set enabled to false (or omit the section)  #
+#   to disable it entirely (zero performance overhead when unused).         #
+#                                                                          #
+############################################################################
+
+apply-in-gamemodes:
+  enabled: false
+  gamemodes:
+    - SURVIVAL
+    - ADVENTURE
+

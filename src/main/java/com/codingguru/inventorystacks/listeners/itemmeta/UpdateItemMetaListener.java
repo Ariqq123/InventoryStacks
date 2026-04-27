@@ -1,6 +1,7 @@
 package com.codingguru.inventorystacks.listeners.itemmeta;
 
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.codingguru.inventorystacks.InventoryStacks;
 import com.codingguru.inventorystacks.handlers.ItemHandler;
+import com.codingguru.inventorystacks.managers.GameModeManager;
 import com.codingguru.inventorystacks.scheduler.Schedule;
 
 public class UpdateItemMetaListener implements Listener {
@@ -26,11 +28,28 @@ public class UpdateItemMetaListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent e) {
+		// Respect gamemode restriction: if the viewing player's gamemode is not
+		// allowed, strip any custom stack size instead of applying it.
+		if (e.getWhoClicked() instanceof Player) {
+			Player p = (Player) e.getWhoClicked();
+			if (!GameModeManager.getInstance().isAllowed(p.getGameMode())) {
+				handleCleanup(e.getCurrentItem());
+				return;
+			}
+		}
 		callNow(e.getCurrentItem());
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	public void onEntityPickup(EntityPickupItemEvent e) {
+		// Respect gamemode restriction for players picking up items.
+		if (e.getEntity() instanceof Player) {
+			Player p = (Player) e.getEntity();
+			if (!GameModeManager.getInstance().isAllowed(p.getGameMode())) {
+				handleCleanup(e.getItem().getItemStack());
+				return;
+			}
+		}
 		callNow(e.getItem().getItemStack());
 	}
 
@@ -110,6 +129,8 @@ public class UpdateItemMetaListener implements Listener {
 	}
 
 	private void handleCleanup(ItemStack stack) {
+		if (stack == null || stack.getType().isAir()) return;
+
 		FileConfiguration config = InventoryStacks.getInstance().getConfig();
 
 		if (!config.getBoolean("auto-stack-cleanup"))
@@ -123,7 +144,17 @@ public class UpdateItemMetaListener implements Listener {
 		if (!meta.hasMaxStackSize())
 			return;
 
+		// Clamp the actual amount to the vanilla max BEFORE stripping the custom
+		// max, so we never leave a slot holding more than its new declared max.
+		// (The excess items are simply discarded here because this code path
+		// fires in a read-only inventory-click context where we cannot safely
+		// redistribute items without risking further event loops.)
+		int vanillaMax = stack.getType().getMaxStackSize();
+		if (stack.getAmount() > vanillaMax) {
+			stack.setAmount(vanillaMax);
+		}
+
 		meta.setMaxStackSize(null);
 		stack.setItemMeta(meta);
 	}
-}
+}

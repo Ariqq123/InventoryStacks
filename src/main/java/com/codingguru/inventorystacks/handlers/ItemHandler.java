@@ -18,6 +18,8 @@ import org.bukkit.inventory.ItemStack;
 
 import com.codingguru.inventorystacks.InventoryStacks;
 import com.codingguru.inventorystacks.items.StackSizeApplier;
+import com.codingguru.inventorystacks.managers.GameModeManager;
+import com.codingguru.inventorystacks.managers.WorldStackManager;
 import com.codingguru.inventorystacks.util.ConsoleUtil;
 import com.codingguru.inventorystacks.util.ReflectionLegacyUtil;
 import com.codingguru.inventorystacks.util.ServerTypeUtil;
@@ -69,6 +71,12 @@ public class ItemHandler {
 		ConsoleUtil.message("");
 
 		applyConfiguredStacks();
+
+		// Load optional per-world stack size overrides (feature is a no-op if absent).
+		WorldStackManager.getInstance().load();
+
+		// Load optional gamemode restriction (feature is a no-op if absent).
+		GameModeManager.getInstance().load();
 
 	}
 
@@ -176,6 +184,8 @@ public class ItemHandler {
 		cachedDefaultStackSizes.clear();
 		cachedUpdatedStackSizes.clear();
 		applyConfiguredStacks();
+		WorldStackManager.getInstance().load();
+		GameModeManager.getInstance().load();
 	}
 
 	private void applyConfiguredStacks() {
@@ -323,6 +333,14 @@ public class ItemHandler {
 		}
 	}
 
+	/**
+	 * Returns the globally configured stack size for the given material, or
+	 * {@code -1} if this plugin has not overridden it.
+	 */
+	public int getGlobalStackSize(XMaterial xMaterial) {
+		return cachedUpdatedStackSizes.getOrDefault(xMaterial, -1);
+	}
+
 	public VersionUtil getServerVersion() {
 		return serverVersion;
 	}
@@ -330,4 +348,43 @@ public class ItemHandler {
 	public ServerTypeUtil getServerType() {
 		return serverType;
 	}
+
+	// -------------------------------------------------------------------------
+	// Legacy compatibility shims
+	// (referenced by older listener files left over from a prior refactor)
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Returns the map of materials that have a custom stack size configured.
+	 * Exposed for backward-compatibility with legacy listener code.
+	 */
+	public Map<XMaterial, Integer> getCachedMaterialSizes() {
+		return cachedUpdatedStackSizes;
+	}
+
+	/**
+	 * Caches a material's original stack size.
+	 * Compatibility shim for legacy reflection utility code.
+	 */
+	public void cacheMaterial(XMaterial xMaterial, int originalSize) {
+		cachedDefaultStackSizes.putIfAbsent(xMaterial, originalSize);
+	}
+
+	/**
+	 * Delegates NMS item stack size application to the active applier.
+	 * Compatibility shim for legacy reflection utility code.
+	 *
+	 * <p>The {@code nmsItem} object is the raw NMS Item; {@code size} is the
+	 * desired stack size. On the modern ItemMeta path this is a no-op.
+	 *
+	 * @param nmsItem the NMS item object
+	 * @param size    the desired stack size
+	 */
+	public void applyStackSizeToNmsItem(Object nmsItem, int size) {
+		// ReflectionUtil (legacy dead-code) calls this; delegate to the real utility.
+		if (!applier.isModernApi()) {
+			ReflectionLegacyUtil.applyStackSizeToNmsItem(nmsItem, null, size);
+		}
+	}
 }
+

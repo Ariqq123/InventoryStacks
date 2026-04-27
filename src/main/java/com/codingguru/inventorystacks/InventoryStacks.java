@@ -14,9 +14,13 @@ import com.codingguru.inventorystacks.listeners.correction.PlayerInteract;
 import com.codingguru.inventorystacks.listeners.correction.PlayerItemConsume;
 import com.codingguru.inventorystacks.listeners.general.BlockPlace;
 import com.codingguru.inventorystacks.listeners.general.Commands;
+import com.codingguru.inventorystacks.listeners.general.PlayerChangedWorldListener;
+import com.codingguru.inventorystacks.listeners.general.PlayerGameModeChangeListener;
 import com.codingguru.inventorystacks.listeners.general.PlayerItemDamage;
 import com.codingguru.inventorystacks.listeners.itemmeta.UpdateItemMetaListener;
 import com.codingguru.inventorystacks.managers.SettingsManager;
+import com.codingguru.inventorystacks.managers.GameModeManager;
+import com.codingguru.inventorystacks.managers.WorldStackManager;
 import com.codingguru.inventorystacks.util.ConsoleUtil;
 
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -55,6 +59,18 @@ public class InventoryStacks extends JavaPlugin {
 
 		if (ItemHandler.getInstance().isUsingModernAPI()) {
 			getServer().getPluginManager().registerEvents(new UpdateItemMetaListener(), this);
+
+			// Register per-world stack listener only when the feature is configured.
+			if (WorldStackManager.getInstance().isEnabled()) {
+				getServer().getPluginManager().registerEvents(new PlayerChangedWorldListener(), this);
+				ConsoleUtil.message(org.bukkit.ChatColor.GREEN + "Per-world stack sizes: " + org.bukkit.ChatColor.YELLOW + "ENABLED");
+			}
+
+			// Register gamemode restriction listener only when the feature is configured.
+			if (GameModeManager.getInstance().isEnabled()) {
+				getServer().getPluginManager().registerEvents(new PlayerGameModeChangeListener(), this);
+				ConsoleUtil.message(org.bukkit.ChatColor.GREEN + "Gamemode restriction: " + org.bukkit.ChatColor.YELLOW + "ENABLED");
+			}
 		} else { // LEGACY SUPPORT
 			getServer().getPluginManager().registerEvents(new PlayerBucketEmpty(itemChangeDelay), this);
 			getServer().getPluginManager().registerEvents(new PlayerItemConsume(itemChangeDelay), this);
