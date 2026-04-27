@@ -3,6 +3,7 @@ version: 2.7.0
 api-version: 1.13
 main: com.codingguru.inventorystacks.InventoryStacks
 authors: [CodingGuru, azreyzaako]
+description: "Change the default 64 stack size for any Minecraft item — per-item, per-world, or per-gamemode."
 folia-supported: true
 commands:
     stack:
