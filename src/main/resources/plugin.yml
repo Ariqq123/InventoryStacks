@@ -2,7 +2,7 @@ name: InventoryStacks
 version: 2.7.0
 api-version: 1.13
 main: com.codingguru.inventorystacks.InventoryStacks
-authors: [CodingGuru]
+authors: [CodingGuru, azreyzaako]
 folia-supported: true
 commands:
     stack:
