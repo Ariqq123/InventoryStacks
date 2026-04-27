@@ -176,7 +176,7 @@ InventoryStacks is built with exploit prevention in mind:
 
 ## 📜 Changelog
 
-### v2.6.2-BETA (Current)
+### v2.7.0 (Current)
 - ✅ Per-world stack size overrides
 - ✅ Gamemode-restricted stacking
 - ✅ `/stacks list` command
